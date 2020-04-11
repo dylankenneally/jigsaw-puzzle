@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Jigsaw Puzzle</title>
+		<link rel="stylesheet" type="text/css" href="css/styles.css" />
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Roboto+Mono:400,500" rel="stylesheet">
+	</head>
+	<body id="body">
+		<div id="canvasParent">
+			<canvas id="canvas"></canvas>
+		</div>
+
+		<div id="settingBtn">
+			<img src="img/settings-24px.svg" />
+		</div>
+
+		<div id="settingsDialog">
+			<div class="dimBackground" id="hideSettings"></div>
+			<div class="options">
+				<h1>Settings</h1>
+
+				<button type="submit" id="veryEasyPuzzle" class="btn">Very easy (15 pieces)</button>
+				<button type="submit" id="easyPuzzle" class="btn">Easy (50 pieces)</button>
+				<button type="submit" id="mediumPuzzle" class="btn">Medium (100 pieces)</button>
+				<button type="submit" id="hardPuzzle" class="btn">Hard (250 pieces)</button>
+				<button type="submit" id="veryHardPuzzle" class="btn">Very hard (500 pieces)</button>
+			</div>
+		</div>
+
+		<script src="js/puzzle.js"></script>
+		<script>
+			const potentialImages = [
+				'https://i.ytimg.com/vi/FooS1nB3kuw/maxresdefault.jpg', // girl house fire meme
+				'https://cdn1.parksmedia.wdprapps.disney.com/resize/mwImage/1/1920/1080/75/dam/disneyland/attractions/disneyland/mickeys-house/mickey-toontown-car-16x9.jpg', // mickey mouse
+				'https://www.greencrossvets.com.au/wp-content/uploads/2018/08/Puppy-Health-Care-Tips.jpg', // puppy
+				'https://images.unsplash.com/photo-1455459182396-ae46100617cb?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80', // cityscape
+			];
+
+			const image = {
+				path: potentialImages[Math.floor(Math.random() * (potentialImages.length))],
+				// path: 'https://i.ytimg.com/vi/FooS1nB3kuw/maxresdefault.jpg',
+				data: null, // `new Image` data stored here
+			};
+
+			function loadFile(imgInstance) {
+				return new Promise((resolve, reject) => {
+					const img = new Image();
+					img.onload = () => {
+						imgInstance.data = img;
+						return resolve();
+					};
+
+					img.onerror = (error) => reject(error);
+					img.src = imgInstance.path;
+				});
+			}
+
+			window.onload = () => {
+				loadFile(image)
+					.then(() => {
+						const handlePuzzleInitialised = () => {
+							document.getElementById('settingsDialog').className = 'settingsDialog';
+							document.getElementById('body').className = '';
+						};
+					
+						const handlePuzzleSolved = () => document.getElementById('body').className = 'solved';
+					
+						const parent = document.getElementById('canvasParent');
+						const element = document.getElementById('canvas');
+						const thePuzzle = new Puzzle(image.data, parent, element, handlePuzzleInitialised, handlePuzzleSolved, 10, 5);
+
+						const showOptions = document.ontouchstart !== null ? 'mousedown' : 'touchstart';
+						document.getElementById('settingBtn').addEventListener(showOptions, () => document.getElementById('settingsDialog').className = 'settingsDialog shown', false);
+					
+						const hideOptions = document.ontouchstart !== null ? 'mousedown' : 'touchstart';
+						document.getElementById('hideSettings').addEventListener(hideOptions, () => document.getElementById('settingsDialog').className = 'settingsDialog', false);
+
+						const onUpdate = document.ontouchstart !== null ? 'mousedown' : 'touchstart';
+						const difficultyBtns = [
+							'veryEasyPuzzle',
+							'easyPuzzle',
+							'mediumPuzzle',
+							'hardPuzzle',
+							'veryHardPuzzle',
+						];
+						difficultyBtns.forEach((btn) => {
+							document.getElementById(btn).addEventListener(onUpdate, () => {
+								let across = 10;
+								let down = 10;
+								switch (btn) {
+									case 'veryEasyPuzzle':
+										across = 5;
+										down = 3;
+										break;
+									case 'easyPuzzle':
+										across = 10;
+										down = 5;
+										break;
+									case 'hardPuzzle':
+										across = 25;
+										down = 10;
+										break;
+									case 'veryHardPuzzle':
+										across = 25;
+										down = 20;
+										break;
+									case 'mediumPuzzle':
+									default:
+								}
+
+								thePuzzle.initialise(across, down);
+							}, false);
+
+						});
+
+						// We delay responding to resize events so that we get a smother render - rendering during the resize operation leads to too many renders and a 'jitter'
+						let resizeTimeout;
+						window.addEventListener('resize', () => {
+							clearTimeout(resizeTimeout);
+							resizeTimeout = setTimeout(thePuzzle.resizeCanvas, 200);
+						});
+					})
+					.catch((error) => {
+						// todo: handle this
+						alert(`Failed to load ${image.path}`);
+						console.error('failed', error);
+					});
+			};
+		</script>
+	</body>
+</html>

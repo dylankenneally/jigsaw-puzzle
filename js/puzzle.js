@@ -20,6 +20,11 @@ class Puzzle {
 			throw new TypeError('The supplied image is not an `Image`');
 		}
 
+		this.initialise = this.initialise.bind(this);
+		this.onInitialised = this.onInitialised.bind(this);
+		this.onSolved = this.onSolved.bind(this);
+		this.resizeCanvas = this.resizeCanvas.bind(this);
+
 		this._image = image;
 		this._image2 = image;
 

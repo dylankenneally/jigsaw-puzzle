@@ -75,7 +75,7 @@ class Puzzle {
 
 		this.initialise();
 		this._setupEventHandlers();
-		setInterval(() => this._render(), 10);
+		this._render();
 	}
 
 	// initialise the puzzle, call this to restart the puzzle
@@ -164,6 +164,7 @@ class Puzzle {
 
 		this._cachedCanvasSize[0] = this._canvasSize[0];
 		this._cachedCanvasSize[1] = this._canvasSize[1];
+		this._render();
 	}
 
 	_setupEventHandlers() {
@@ -237,6 +238,8 @@ class Puzzle {
 		if (this._pieces.length === 0 && this._puzzleSolvedCallback) {
 			this._puzzleSolvedCallback();
 		}
+
+		this._render();
 	}
 
 	_movePiece(e) {
@@ -248,6 +251,7 @@ class Puzzle {
 		// keep in the canvas
 		piece.x = Math.min(Math.max(0, posX), this._canvasSize[0] - piece.w);
 		piece.y = Math.min(Math.max(0, posY), this._canvasSize[1] - piece.h);
+		this._render();
 	}
 
 	_isSolved(piece) {

@@ -20,11 +20,6 @@ class Puzzle {
 			throw new TypeError('The supplied image is not an `Image`');
 		}
 
-		this.initialise = this.initialise.bind(this);
-		this.onInitialised = this.onInitialised.bind(this);
-		this.onSolved = this.onSolved.bind(this);
-		this.resizeCanvas = this.resizeCanvas.bind(this);
-
 		this._image = image;
 		this._image2 = image;
 
@@ -58,6 +53,11 @@ class Puzzle {
 
 		this._numberOfPieces = [piecesAcross, piecesDown];
 
+		this.initialise = this.initialise.bind(this);
+		this.onInitialised = this.onInitialised.bind(this);
+		this.onSolved = this.onSolved.bind(this);
+		this.resizeCanvas = this.resizeCanvas.bind(this);
+
 		this._canvasSize = [0, 0];				// canvas attributes
 		this._cachedCanvasSize = [0, 0];		// used during resize operations
 
@@ -75,7 +75,7 @@ class Puzzle {
 
 		this.initialise();
 		this._setupEventHandlers();
-		setInterval(() => this._render(), 10);
+		this._render();
 	}
 
 	// initialise the puzzle, call this to restart the puzzle
@@ -164,6 +164,7 @@ class Puzzle {
 
 		this._cachedCanvasSize[0] = this._canvasSize[0];
 		this._cachedCanvasSize[1] = this._canvasSize[1];
+		this._render();
 	}
 
 	_setupEventHandlers() {
@@ -237,6 +238,8 @@ class Puzzle {
 		if (this._pieces.length === 0 && this._puzzleSolvedCallback) {
 			this._puzzleSolvedCallback();
 		}
+
+		this._render();
 	}
 
 	_movePiece(e) {
@@ -248,6 +251,7 @@ class Puzzle {
 		// keep in the canvas
 		piece.x = Math.min(Math.max(0, posX), this._canvasSize[0] - piece.w);
 		piece.y = Math.min(Math.max(0, posY), this._canvasSize[1] - piece.h);
+		this._render();
 	}
 
 	_isSolved(piece) {
@@ -334,6 +338,7 @@ class Puzzle {
 		this._solvedPieces.forEach((piece) => this._renderPiece(piece));
 		this._pieces.forEach((piece) => this._renderPiece(piece));
 
+		// Draw the image dimmed as a helper for the user to see the target image
 		this._renderContext.globalAlpha = 0.1;
 		this._renderContext.drawImage(this._image2, 0, 0, this._canvasSize[0], this._canvasSize[1]);
 	}
